@@ -1,0 +1,42 @@
+[project]
+authors = []
+description = ""
+name = "api"
+requires-python = ">=3.7"
+version = "0.1.0"
+dependencies = [
+    "strawberry-graphql",
+    "fastapi",
+    "uvicorn",
+    "rich>=13.0.1",
+    "httpx>=0.23.3",
+    "humanize>=4.4.0",
+]
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+combine_as_imports = true
+combine_star = true
+indent = 4
+known_pytest = ["pytest"]
+known_strawberry = ["strawberry"]
+lines_after_imports = 2
+profile = "black"
+sections = ["FUTURE", "STDLIB", "PYTEST", "THIRDPARTY", "STRAWBERRY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.mypy]
+plugins = ["strawberry.ext.mypy_plugin"]
+
+[tool.pdm]
+[tool.pdm.scripts]
+dev = "uvicorn main:app --reload"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=22.12.0",
+]
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
