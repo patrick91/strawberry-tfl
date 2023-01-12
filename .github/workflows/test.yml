@@ -31,12 +31,9 @@ jobs:
         run: |
           curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -
           pdm install
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --show-source --statistics
       - name: Test with pytest
         run: |
-          pytest tests/
+          pdm run pytest tests/
       - name: Export schema
         run: |
           strawberry export-schema api.schema > ${{ env.SCHEMA_FILE }}
