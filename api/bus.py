@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-import asyncio
+import os
+
 from datetime import timedelta
 from typing import Any
 
 import httpx
 import humanize
 import strawberry
+
+API_KEY = os.environ["TFL_API_KEY"]
 
 
 @strawberry.type
@@ -31,10 +34,16 @@ class BusStop:
 
     @strawberry.field
     async def arrivals(self) -> list[Arrival]:
+        print("arrivals", self.id)
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"https://api.tfl.gov.uk/StopPoint/{self.id}/Arrivals"
+                f"https://api.tfl.gov.uk/StopPoint/{self.id}/Arrivals",
+                params={"app_key": API_KEY},
             )
+
+            print(response.url)
+
+            response.raise_for_status()
 
             data = response.json()
 
@@ -87,6 +96,9 @@ class BusStop:
 
             data = response.json()
 
+            # not sure why the API returns a different id
+            data["id"] = id
+
             return BusStop.from_api(data)
 
 
@@ -102,8 +114,11 @@ class BusQuery:
                     "lat": latitude,
                     "lon": longitude,
                     "stopTypes": "NaptanPublicBusCoachTram",
+                    "app_key": API_KEY,
                 },
             )
+
+            response.raise_for_status()
 
             data = response.json()
 
