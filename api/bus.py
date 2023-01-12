@@ -34,14 +34,11 @@ class BusStop:
 
     @strawberry.field
     async def arrivals(self) -> list[Arrival]:
-        print("arrivals", self.id)
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"https://api.tfl.gov.uk/StopPoint/{self.id}/Arrivals",
                 params={"app_key": API_KEY},
             )
-
-            print(response.url)
 
             response.raise_for_status()
 
