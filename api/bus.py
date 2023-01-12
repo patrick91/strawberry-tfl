@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 from datetime import timedelta
+from typing import Any
 
 import httpx
 import humanize
@@ -17,19 +20,17 @@ class Arrival:
         return humanize.naturaldelta(timedelta(seconds=self.time_to_station_))
 
 
-@strawberry.type
+@strawberry.federation.type(keys=["id"])
 class BusStop:
     id: strawberry.ID
     common_name: str
     buses: list[str]
-    stop_letter: str
+    stop_letter: str | None
     towards: str | None
     direction: str | None
 
     @strawberry.field
     async def arrivals(self) -> list[Arrival]:
-        await asyncio.sleep(2)
-
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"https://api.tfl.gov.uk/StopPoint/{self.id}/Arrivals"
@@ -48,12 +49,51 @@ class BusStop:
 
         return sorted(arrivals, key=lambda arrival: arrival.time_to_station_)
 
+    @classmethod
+    def from_api(cls, data: dict[str, Any]) -> BusStop:
+        towards = next(
+            (
+                property["value"]
+                for property in data["additionalProperties"]
+                if property["key"] == "Towards"
+            ),
+            None,
+        )
+
+        direction = next(
+            (
+                property["value"]
+                for property in data["additionalProperties"]
+                if property["key"] == "Direction"
+            ),
+            None,
+        )
+
+        return BusStop(
+            id=data["id"],
+            common_name=data["commonName"],
+            buses=[line["name"] for line in data.get("lines", [])],
+            stop_letter=data.get("stopLetter"),
+            towards=towards,
+            direction=direction,
+        )
+
+    @staticmethod
+    async def resolve_reference(id: strawberry.ID) -> BusStop:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.tfl.gov.uk/StopPoint/{id}",
+            )
+
+            data = response.json()
+
+            return BusStop.from_api(data)
+
 
 @strawberry.type
 class BusQuery:
     @strawberry.field
     async def find_bus_stop(self, latitude: float, longitude: float) -> list[BusStop]:
-        stops: list[BusStop] = []
 
         async with httpx.AsyncClient() as client:
             response = await client.get(
@@ -65,43 +105,8 @@ class BusQuery:
                 },
             )
 
-            data = response.json()["stopPoints"]
+            data = response.json()
 
-            for stop in data:
-                towards = next(
-                    (
-                        property["value"]
-                        for property in stop["additionalProperties"]
-                        if property["key"] == "Towards"
-                    ),
-                    None,
-                )
-
-                direction = next(
-                    (
-                        property["value"]
-                        for property in stop["additionalProperties"]
-                        if property["key"] == "Direction"
-                    ),
-                    None,
-                )
-
-                if "stopLetter" not in stop:
-                    # TODO: check if this is a problem
-                    # we only care about bus stops, and they usually have
-                    # a letter
-
-                    continue
-
-                stops.append(
-                    BusStop(
-                        id=stop["id"],
-                        common_name=stop["commonName"],
-                        buses=[line["name"] for line in stop["lines"]],
-                        stop_letter=stop["stopLetter"],
-                        towards=towards,
-                        direction=direction,
-                    )
-                )
+            stops = [BusStop.from_api(stop) for stop in data["stopPoints"]]
 
         return stops
