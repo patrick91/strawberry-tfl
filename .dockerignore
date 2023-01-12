@@ -1,0 +1,12 @@
+# flyctl launch added from .gitignore
+**/.pdm.toml
+**/.DS_Store
+**/__pycache__
+**/.vscode
+**/.virtualenv
+**/*.egg-info
+
+# flyctl launch added from .venv/.gitignore
+# created by virtualenv automatically
+.venv/**/*
+fly.toml

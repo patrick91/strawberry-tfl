@@ -32,6 +32,7 @@ plugins = ["strawberry.ext.mypy_plugin"]
 [tool.pdm]
 [tool.pdm.scripts]
 dev = "uvicorn main:app --reload"
+start = "uvicorn main:app --host 0.0.0.0 --port 8080"
 
 [tool.pdm.dev-dependencies]
 dev = [
