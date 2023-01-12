@@ -1,3 +1,4 @@
+import asyncio
 from datetime import timedelta
 
 import httpx
@@ -27,6 +28,7 @@ class BusStop:
 
     @strawberry.field
     async def arrivals(self) -> list[Arrival]:
+        await asyncio.sleep(2)
 
         async with httpx.AsyncClient() as client:
             response = await client.get(
