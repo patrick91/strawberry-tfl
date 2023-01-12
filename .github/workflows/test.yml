@@ -36,7 +36,7 @@ jobs:
           pdm run pytest tests/
       - name: Export schema
         run: |
-          strawberry export-schema api.schema > ${{ env.SCHEMA_FILE }}
+          pdm run strawberry export-schema api.schema > ${{ env.SCHEMA_FILE }}
       - name: Upload schema to artifact
         uses: actions/upload-artifact@v3
         with:
