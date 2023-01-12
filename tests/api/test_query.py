@@ -4,3 +4,7 @@ from main import app
 
 
 client = TestClient(app)
+
+
+def test_fake():
+    assert True
