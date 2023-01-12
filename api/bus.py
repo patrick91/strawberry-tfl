@@ -22,7 +22,8 @@ class BusStop:
     common_name: str
     buses: list[str]
     stop_letter: str
-    towards: str
+    towards: str | None
+    direction: str | None
 
     @strawberry.field
     async def arrivals(self) -> list[Arrival]:
@@ -66,10 +67,30 @@ class BusQuery:
 
             for stop in data:
                 towards = next(
-                    property["value"]
-                    for property in stop["additionalProperties"]
-                    if property["key"] == "Towards"
+                    (
+                        property["value"]
+                        for property in stop["additionalProperties"]
+                        if property["key"] == "Towards"
+                    ),
+                    None,
                 )
+
+                direction = next(
+                    (
+                        property["value"]
+                        for property in stop["additionalProperties"]
+                        if property["key"] == "Direction"
+                    ),
+                    None,
+                )
+
+                if "stopLetter" not in stop:
+                    # TODO: check if this is a problem
+                    # we only care about bus stops, and they usually have
+                    # a letter
+
+                    continue
+
                 stops.append(
                     BusStop(
                         id=stop["id"],
@@ -77,6 +98,7 @@ class BusQuery:
                         buses=[line["name"] for line in stop["lines"]],
                         stop_letter=stop["stopLetter"],
                         towards=towards,
+                        direction=direction,
                     )
                 )
 
