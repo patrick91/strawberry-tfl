@@ -36,7 +36,7 @@ jobs:
           pdm test
       - name: Export schema
         run: |
-          pdm run strawberry export-schema api.schema > ${{ env.SCHEMA_FILE }}
+          pdm export-schema > ${{ env.SCHEMA_FILE }}
       - name: Upload schema to artifact
         uses: actions/upload-artifact@v3
         with:

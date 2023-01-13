@@ -39,6 +39,9 @@ start = "uvicorn main:app --host 0.0.0.0 --port 8080"
 test.cmd = "pytest"
 test.env = {TFL_API_KEY = "bar"}
 
+export-schema.cmd = "strawberry export-schema api.schema"
+export-schema.env = {TFL_API_KEY = "bar"}
+
 [tool.pdm.dev-dependencies]
 dev = [
   "black>=22.12.0",
