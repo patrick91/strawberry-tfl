@@ -33,7 +33,7 @@ jobs:
           pdm install
       - name: Test with pytest
         run: |
-          pdm run pytest tests/
+          pdm test
       - name: Export schema
         run: |
           pdm run strawberry export-schema api.schema > ${{ env.SCHEMA_FILE }}
