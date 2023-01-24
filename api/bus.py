@@ -55,31 +55,38 @@ class BusStop:
 
         return sorted(arrivals, key=lambda arrival: arrival.time_to_station_)
 
+    @staticmethod
+    def find_property(data: dict[str, Any], key: str) -> str | None:
+        if property := data.get(key):
+            return property
+
+        if property := next(
+            (
+                property["value"]
+                for property in data["additionalProperties"]
+                if property["key"] == key
+            ),
+            None,
+        ):
+            return property
+
+        # TODO: this is probably not needed
+        for children in data.get("children", []):
+            if property := BusStop.find_property(children, key):
+                return property
+
+        return None
+
     @classmethod
     def from_api(cls, data: dict[str, Any]) -> BusStop:
-        towards = next(
-            (
-                property["value"]
-                for property in data["additionalProperties"]
-                if property["key"] == "Towards"
-            ),
-            None,
-        )
-
-        direction = next(
-            (
-                property["value"]
-                for property in data["additionalProperties"]
-                if property["key"] == "Direction"
-            ),
-            None,
-        )
+        towards = cls.find_property(data, "Towards")
+        direction = cls.find_property(data, "Direction")
 
         return BusStop(
             id=data["id"],
             common_name=data["commonName"],
             buses=[line["name"] for line in data.get("lines", [])],
-            stop_letter=data.get("stopLetter"),
+            stop_letter=cls.find_property(data, "stopLetter"),
             towards=towards,
             direction=direction,
         )
@@ -93,8 +100,9 @@ class BusStop:
 
             data = response.json()
 
-            # not sure why the API returns a different id
-            data["id"] = id
+            data = next(
+                children for children in data["children"] if children["id"] == id
+            )
 
             return BusStop.from_api(data)
 
