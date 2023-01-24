@@ -102,6 +102,10 @@ class BusStop:
 @strawberry.type
 class BusQuery:
     @strawberry.field
+    async def bus_stop(self, id: strawberry.ID) -> BusStop:
+        return await BusStop.resolve_reference(id)
+
+    @strawberry.field
     async def find_bus_stop(self, latitude: float, longitude: float) -> list[BusStop]:
 
         async with httpx.AsyncClient() as client:
