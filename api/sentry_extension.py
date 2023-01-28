@@ -10,7 +10,7 @@ from strawberry.utils.cached_property import cached_property
 from sentry_sdk import start_transaction
 
 
-class SentryTracingExtension(Extension):
+class SentryExtension(Extension):
     def __init__(
         self,
         *,
