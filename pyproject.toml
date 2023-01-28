@@ -1,12 +1,13 @@
 [project]
 authors = []
 dependencies = [
-  "strawberry-graphql",
-  "fastapi",
-  "uvicorn",
-  "rich>=13.0.1",
-  "httpx>=0.23.3",
-  "humanize>=4.4.0",
+    "strawberry-graphql",
+    "fastapi",
+    "uvicorn",
+    "rich>=13.0.1",
+    "httpx>=0.23.3",
+    "humanize>=4.4.0",
+    "sentry-sdk[fastapi]>=1.14.0",
 ]
 description = ""
 name = "api"
