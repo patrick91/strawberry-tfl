@@ -58,7 +58,7 @@ class SentryExtension(Extension):
 
     def on_validation_start(self):
         self.validation_transaction = self.transaction.start_child(
-            op="validation", name="Validation"
+            op="validation", description="Validation"
         )
 
     def on_validation_end(self):
@@ -66,7 +66,7 @@ class SentryExtension(Extension):
 
     def on_parsing_start(self):
         self.parsing_transaction = self.transaction.start_child(
-            op="parsing", name="Parsing"
+            op="parsing", description="Parsing"
         )
 
     def on_parsing_end(self):
@@ -84,7 +84,7 @@ class SentryExtension(Extension):
         field_path = f"{info.parent_type}.{info.field_name}"
 
         with self.transaction.start_child(
-            op="resolve", name=f"Resolving: {field_path}"
+            op="resolve", description=f"Resolving: {field_path}"
         ) as transaction:
 
             transaction.set_tag("graphql.field_name", info.field_name)
